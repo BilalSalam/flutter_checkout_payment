@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 
 part 'package:flutter_checkout_payment/models/billing_model.dart';
 part 'package:flutter_checkout_payment/models/card_tokenisation_response.dart';
+part 'package:flutter_checkout_payment/models/security_code_response.dart';
 part 'package:flutter_checkout_payment/models/phone_model.dart';
 
 enum Environment { SANDBOX, LIVE }
@@ -16,6 +17,7 @@ class FlutterCheckoutPayment {
   /// Methods name which detect which it called from Flutter.
   static const String METHOD_INIT = "init";
   static const String METHOD_GENERATE_TOKEN = "generateToken";
+  static const String METHOD_GENERATE_CVV_TOKEN = "generateCVVToken";
   static const String METHOD_GENERATE_APPLE_PAY_TOKEN = "generateApplePayToken";
   static const String METHOD_GENERATE_GOOGLE_PAY_TOKEN = "generateGooglePayToken";
   static const String METHOD_IS_CARD_VALID = "isCardValid";
@@ -68,6 +70,22 @@ class FlutterCheckoutPayment {
         'billingModel': billingModel?.toMap(),
       });
       return CardTokenisationResponse.fromString(stringJSON);
+    } on PlatformException catch (e) {
+      throw FlutterCheckoutException.fromPlatformException(e);
+    }
+  }
+
+  /// Generate CVV Token.
+  ///
+  /// [cvv] The cvv behind the card.
+  static Future<SecurityCodeResponse?> generateCVVToken({
+    required String cvv,
+  }) async {
+    try {
+      final String stringJSON = await _channel.invokeMethod(METHOD_GENERATE_CVV_TOKEN, <String, dynamic>{
+        'cvv': cvv,
+      });
+      return SecurityCodeResponse.fromString(stringJSON);
     } on PlatformException catch (e) {
       throw FlutterCheckoutException.fromPlatformException(e);
     }
